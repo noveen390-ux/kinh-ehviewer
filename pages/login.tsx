@@ -4,19 +4,12 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const res = await fetch('/api/user/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
-    })
-    const data = await res.json()
-    if (data.error) return setError(true)
+    if (password !== '12345') return setError(true)
     document.cookie = 'auth=12345; Path=/; SameSite=Lax; Max-Age=2592000'
     const params = new URLSearchParams(window.location.search)
-    const redirect = params.get('redirect') || '/'
-    window.location.href = redirect
+    window.location.href = params.get('redirect') || '/'
   }
 
   return (
