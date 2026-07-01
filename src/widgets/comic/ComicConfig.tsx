@@ -14,8 +14,8 @@ export interface ComicConfigProps {
 }
 
 const defualtComicConfig: ComicConfigProps = {
-  direction: 'vertical',
-  imgFit: false,
+  direction: 'rtl',
+  imgFit: true,
 }
 
 const ComicConfigContext = createContext<
