@@ -15,8 +15,6 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     cover: {
       margin: theme.spacing(0, 'auto'),
-      maxHeight: 320,
-      minHeight: 150,
     },
 
     container: {
