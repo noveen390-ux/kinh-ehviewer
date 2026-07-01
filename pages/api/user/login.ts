@@ -5,7 +5,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   const { password } = req.body
   if (password === '12345') {
-    res.setHeader('Set-Cookie', 'auth=12345; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000')
+    res.setHeader('Set-Cookie', 'auth=12345; Path=/; SameSite=Lax; Max-Age=2592000')
     return res.json({ error: false })
   }
 

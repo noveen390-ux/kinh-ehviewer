@@ -1,8 +1,6 @@
-import { useRouter } from 'next/router'
 import { useState } from 'react'
 
 export default function Login() {
-  const router = useRouter()
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
 
@@ -15,8 +13,10 @@ export default function Login() {
     })
     const data = await res.json()
     if (data.error) return setError(true)
-    const redirect = (router.query.redirect as string) || '/'
-    router.push(redirect)
+    document.cookie = 'auth=12345; Path=/; SameSite=Lax; Max-Age=2592000'
+    const params = new URLSearchParams(window.location.search)
+    const redirect = params.get('redirect') || '/'
+    window.location.href = redirect
   }
 
   return (
