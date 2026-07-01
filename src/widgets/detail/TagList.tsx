@@ -5,6 +5,7 @@ import makeStyles from '@mui/styles/makeStyles'
 import { useTranslation } from 'next-i18next'
 import { useRouter } from 'next/router'
 import React from 'react'
+import { translateTag } from '@/utils/arabicDict'
 const useStyles = makeStyles(() =>
   createStyles({
     label: {},
@@ -19,7 +20,12 @@ const TagList: React.FC<Pick<Detailpage, 'tagList'>> = ({ tagList }) => {
   const classes = useStyles()
   const [t, i18n] = useTranslation()
   const isChinese = i18n.language === 'zh'
-  const trans = (obj: any, key: string) => obj[isChinese ? key + '_CHS' : key]
+  const isArabic = i18n.language === 'ar'
+  const trans = (obj: any, key: string) => {
+    if (isChinese && obj[key + '_CHS']) return obj[key + '_CHS']
+    if (isArabic && obj[key]) return translateTag(obj[key])
+    return obj[key]
+  }
   return (
     <>
       {tagList.length === 0 && (
@@ -40,7 +46,7 @@ const TagList: React.FC<Pick<Detailpage, 'tagList'>> = ({ tagList }) => {
                   {o.tags.map((v) => (
                     <Tooltip
                       key={v.name}
-                      title={i18n.language === 'zh' ? v.intro : ''}
+                      title={isChinese ? v.intro : ''}
                       arrow
                     >
                       <Chip

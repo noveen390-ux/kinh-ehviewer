@@ -23,6 +23,8 @@ import { uniqBy } from 'lodash-es'
 import { useRouter } from 'next/router'
 import React from 'react'
 import RatingInview from './RatingInview'
+import { useIsArabic, useTranslatedCategory, useTranslatedTitle } from '@/hooks/useContentTranslate'
+import { translateTag } from '@/utils/arabicDict'
 function storageHistory(record: IndexListItemPorps) {
   const his = JSON.parse(
     localStorage.getItem(LOCAL_HISTORY) || '[]'
@@ -132,6 +134,9 @@ export const MobileCard: React.FC<{ record: IndexListItemPorps }> = ({
       ? /\/?watched/.test(router.pathname)
       : config.showTag) && record.tags?.length > 0
   const classes = useMobileStyles({ showTag })
+  const isArabic = useIsArabic()
+  const titleTranslated = useTranslatedTitle(record.title)
+  const categoryTranslated = useTranslatedCategory(record.category)
   return (
     <Card className={classes.root} ref={ref}>
       {inview && (
@@ -156,7 +161,7 @@ export const MobileCard: React.FC<{ record: IndexListItemPorps }> = ({
                         className={classes.title}
                         title={record.title}
                       >
-                        {record.title}
+                        {titleTranslated}
                       </Typography>
                     </Grid>
                     <Grid
@@ -196,7 +201,7 @@ export const MobileCard: React.FC<{ record: IndexListItemPorps }> = ({
                       <Grid item xs>
                         <ColorChip
                           variant="outlined"
-                          label={record.category}
+                          label={categoryTranslated}
                           size="small"
                         />
                       </Grid>
@@ -223,7 +228,7 @@ export const MobileCard: React.FC<{ record: IndexListItemPorps }> = ({
                       [classes.watched]: o.watched,
                     })}
                   >
-                    {o.tagName}
+                    {isArabic ? translateTag(o.tagName) : o.tagName}
                   </li>
                 ))}
               </ul>
@@ -267,6 +272,8 @@ export const DesktopCard: React.FC<{ record: IndexListItemPorps }> = ({
   record,
 }) => {
   const classes = useStyles()
+  const titleTranslated = useTranslatedTitle(record.title)
+  const categoryTranslated = useTranslatedCategory(record.category)
 
   return (
     <Card className={classes.card}>
@@ -287,12 +294,12 @@ export const DesktopCard: React.FC<{ record: IndexListItemPorps }> = ({
               component="h2"
               title={record.title}
             >
-              {record.title}
+              {titleTranslated}
             </Typography>
             <Grid container alignItems="center" justifyContent="space-between">
               <ColorChip
                 variant="outlined"
-                label={record.category}
+                label={categoryTranslated}
                 size="small"
               />
               <RatingInview value={+record.rating} />

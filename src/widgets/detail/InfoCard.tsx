@@ -32,6 +32,7 @@ import { omit } from 'lodash-es'
 import { useTranslation } from 'next-i18next'
 import { useRouter } from 'next/router'
 import React from 'react'
+import { useIsArabic, useTranslatedCategory } from '@/hooks/useContentTranslate'
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chip: {
@@ -215,11 +216,12 @@ const DesktopInfoCard: React.FC<{ record: IndexListItemPorps }> = ({
 }) => {
   const classes = useStyles()
   const [t] = useTranslation()
+  const categoryTranslated = useTranslatedCategory(record.category)
   return (
     <div className={clsx(classes.infoContainer)}>
       <ColorChip
         className={classes.chip}
-        label={record.category}
+        label={categoryTranslated}
         size="small"
       />
       <Link color="inherit" href={`/?f_search=uploader:${record.uploader}`}>

@@ -33,6 +33,7 @@ import { useTranslation } from 'next-i18next'
 import { useRouter } from 'next/router'
 import React, { useState } from 'react'
 import FavIconButton from './FavIconButton'
+import { useIsArabic, useTranslatedCategory, useTranslatedTitle } from '@/hooks/useContentTranslate'
 import InfoCard from './InfoCard'
 import TagList from './TagList'
 import TorrentIconButton from './TorrentIconButton'
@@ -114,6 +115,8 @@ interface InfoProps {
 const Info: React.FC<InfoProps> = ({ info, tagList }) => {
   const classes = useStyles()
   const [t] = useTranslation()
+  const categoryTranslated = useTranslatedCategory(info.category)
+  const titleTranslated = useTranslatedTitle(info.title)
   return (
     <Card className={classes.root}>
       <Hidden mdDown>
@@ -152,13 +155,13 @@ const Info: React.FC<InfoProps> = ({ info, tagList }) => {
                   {info.uploader}
                 </Typography>
               </Link>
-              <ColorChip label={info.category} />
+              <ColorChip label={categoryTranslated} />
             </Hidden>
           </div>
 
           <Hidden smDown>
             <SelectTypography variant="subtitle2" gutterBottom align="center">
-              {info.title}
+              {titleTranslated}
             </SelectTypography>
           </Hidden>
         </div>
@@ -232,6 +235,8 @@ const MobileInfo: React.FC<InfoProps> = ({ info, tagList }) => {
   const classes = useStylesMobile()
   const router = useRouter()
   const [t] = useTranslation()
+  const categoryTranslated = useTranslatedCategory(info.category)
+  const titleJpnTranslated = useTranslatedTitle(info.title_jpn)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [comicReadPageHistory] = useComicReadPageHistory()
   const latestReadPage = comicReadPageHistory[`/${info.gid}/${info.token}/read`]
@@ -261,7 +266,7 @@ const MobileInfo: React.FC<InfoProps> = ({ info, tagList }) => {
             align="left"
             className={classes.title}
           >
-            {info.title_jpn}
+            {titleJpnTranslated}
           </SelectTypography>
           <Link color="inherit" href={`/?f_search=uploader:${info.uploader}`}>
             <Typography gutterBottom variant="subtitle2" color="textSecondary">
@@ -269,7 +274,7 @@ const MobileInfo: React.FC<InfoProps> = ({ info, tagList }) => {
             </Typography>
           </Link>
           <Grid item>
-            <ColorChip label={info.category} />
+            <ColorChip label={categoryTranslated} />
           </Grid>
           <Grid item xs />
           <Grid
