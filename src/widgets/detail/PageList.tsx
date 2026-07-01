@@ -19,13 +19,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
     container: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(5, 1fr)',
-      [theme.breakpoints.down('md')]: {
-        gridTemplateColumns: 'repeat(3, 1fr)',
-      },
-      [theme.breakpoints.down('sm')]: {
-        gridTemplateColumns: 'repeat(1, 1fr)',
-      },
+      gridTemplateColumns: 'repeat(1, 1fr)',
     },
 
     speedDial: {
