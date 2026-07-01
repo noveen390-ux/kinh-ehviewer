@@ -9,7 +9,7 @@ import { useRouter, Router } from 'next/router'
 import Script from 'next/script'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import ThemeProvider from 'src/theme'
 import { SWRConfig } from 'swr'
 
@@ -26,9 +26,25 @@ function MyApp(props: AppProps) {
   const { Component, pageProps } = props
   const matches = useIsIosStandalone()
   const router = useRouter()
+  const [authChecked, setAuthChecked] = useState(false)
+
+  useEffect(() => {
+    const auth = document.cookie.split('; ').find(c => c.startsWith('auth='))
+    const isValid = auth === 'auth=12345'
+    if (router.pathname === '/login') {
+      if (isValid) router.replace('/')
+      else setAuthChecked(true)
+      return
+    }
+    if (!isValid) {
+      router.replace('/login')
+    } else {
+      setAuthChecked(true)
+    }
+  }, [router.pathname])
+
   React.useEffect(() => {
     document.documentElement.dir = router.locale === 'ar' ? 'rtl' : 'ltr'
-    // Remove the server-side injected CSS.
     const jssStyles = document.querySelector('#jss-server-side')
     if (jssStyles) {
       jssStyles.parentElement!.removeChild(jssStyles)
@@ -49,6 +65,10 @@ function MyApp(props: AppProps) {
       })
     }
   }, [])
+
+  if (!authChecked && router.pathname !== '/login') {
+    return <div style={{ background: '#111', height: '100vh' }} />
+  }
 
   return (
     <React.Fragment>
