@@ -29,8 +29,7 @@ function MyApp(props: AppProps) {
   const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
-    const auth = document.cookie.split('; ').find(c => c.startsWith('auth='))
-    const isValid = auth === 'auth=12345'
+    const isValid = localStorage.getItem('auth') === '12345'
     if (router.pathname === '/login') {
       if (isValid) {
         const params = new URLSearchParams(window.location.search)

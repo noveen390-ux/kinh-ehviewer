@@ -7,7 +7,7 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (password !== '12345') return setError(true)
-    document.cookie = 'auth=12345; Path=/; SameSite=Lax; Max-Age=2592000'
+    localStorage.setItem('auth', '12345')
     const params = new URLSearchParams(window.location.search)
     window.location.href = params.get('redirect') || '/'
   }
