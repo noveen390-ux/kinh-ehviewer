@@ -6,7 +6,6 @@ import ComicHorizontalList from '@/widgets/comic/ComicHorizontalList'
 import ComicList from '@/widgets/comic/ComicList'
 import { NextPage } from 'next'
 import { useTranslation } from 'next-i18next'
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { useRouter } from 'next/router'
 import React from 'react'
 const Read: NextPage = () => {
@@ -49,10 +48,3 @@ const Read: NextPage = () => {
 }
 
 export default Read
-export async function getServerSideProps({ locale }: { locale: string }) {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale)),
-    },
-  }
-}
