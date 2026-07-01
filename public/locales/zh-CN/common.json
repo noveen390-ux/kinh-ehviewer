@@ -3,7 +3,8 @@
   "Watched": "订阅",
   "Popular": "热门",
   "Favorites": "收藏",
-  "Histories": "历史",
+  "Histories": "zh-CN",
+  "Shorts": "Shorts",
   "Settings": "设置",
   "About": "关于",
   "About.Author": "作者",
@@ -88,3 +89,4 @@
   "Similar": "相关画廊",
   "imgFit":"图片自适应"
 }
+

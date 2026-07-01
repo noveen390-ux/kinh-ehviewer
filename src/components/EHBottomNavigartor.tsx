@@ -10,6 +10,7 @@ import makeStyles from '@mui/styles/makeStyles'
 import FavoriteIcon from '@mui/icons-material/Favorite'
 import HistoryIcon from '@mui/icons-material/History'
 import HomeIcon from '@mui/icons-material/Home'
+import SmartDisplayIcon from '@mui/icons-material/SmartDisplay'
 import SubscriptionsIcon from '@mui/icons-material/Subscriptions'
 import WhatshotIcon from '@mui/icons-material/Whatshot'
 import clsx from 'clsx'
@@ -22,6 +23,7 @@ const MENU = [
   { title: 'Watched', icon: <SubscriptionsIcon />, link: '/watched' },
   { title: 'Popular', icon: <WhatshotIcon />, link: '/popular' },
   { title: 'Favorites', icon: <FavoriteIcon />, link: '/favorites' },
+  { title: 'Shorts', icon: <SmartDisplayIcon />, link: '/shorts' },
   { title: 'Histories', icon: <HistoryIcon />, link: '/histories' },
   // { title: 'Settings', icon: <SettingsIcon />, link: '/settings' },
 ]

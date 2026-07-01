@@ -3,7 +3,8 @@
   "Watched": "Diawasi",
   "Popular": "Popular",
   "Favorites": "Kegemaran",
-  "Histories": "Sejarah",
+  "Histories": "ms",
+  "Shorts": "Shorts",
   "Settings": "Menetapkan",
   "About": "Mengenai",
   "About.Author": "Pengarang",
@@ -88,3 +89,4 @@
   "Similar": "Similar",
   "imgFit":"Picture adaptive"
 }
+

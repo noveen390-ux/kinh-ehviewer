@@ -3,7 +3,8 @@
   "Watched": "ติดตาม",
   "Popular": "นิยม",
   "Favorites": "ชื่นชอบ",
-  "Histories": "ประวัติ",
+  "Histories": "th",
+  "Shorts": "Shorts",
   "Setting": "การตั้งค่า",
   "About": "เกี่ยวกับ",
   "About.Author": "ผู้จัดทำ",
@@ -88,3 +89,4 @@
   "Similar": "คล้ายกัน",
   "imgFit":"การปรับภาพ"
 }
+
