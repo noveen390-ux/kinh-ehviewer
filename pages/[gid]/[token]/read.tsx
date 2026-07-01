@@ -49,16 +49,10 @@ const Read: NextPage = () => {
 }
 
 export default Read
-export async function getStaticProps({ locale }: { locale: string }) {
+export async function getServerSideProps({ locale }: { locale: string }) {
   return {
     props: {
       ...(await serverSideTranslations(locale)),
     },
-  }
-}
-export async function getStaticPaths() {
-  return {
-    paths: [],
-    fallback: 'blocking',
   }
 }

@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline'
 import { appWithTranslation } from 'next-i18next'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
-import { Router } from 'next/router'
+import { useRouter, Router } from 'next/router'
 import Script from 'next/script'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
@@ -25,7 +25,9 @@ Router.events.on('routeChangeError', () => NProgress.done())
 function MyApp(props: AppProps) {
   const { Component, pageProps } = props
   const matches = useIsIosStandalone()
+  const router = useRouter()
   React.useEffect(() => {
+    document.documentElement.dir = router.locale === 'ar' ? 'rtl' : 'ltr'
     // Remove the server-side injected CSS.
     const jssStyles = document.querySelector('#jss-server-side')
     if (jssStyles) {
@@ -51,7 +53,7 @@ function MyApp(props: AppProps) {
   return (
     <React.Fragment>
       <Head>
-        <title>EhentaiView</title>
+        <title>Kinh EhViewer</title>
         <meta
           name="viewport"
           content="minimum-scale=1, initial-scale=1, width=device-width, viewport-fit=cover"

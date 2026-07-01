@@ -96,17 +96,10 @@ const Detail: NextPage = () => {
 }
 
 export default Detail
-export async function getStaticProps({ locale }: { locale: string }) {
+export async function getServerSideProps({ locale }: { locale: string }) {
   return {
     props: {
       ...(await serverSideTranslations(locale)),
     },
-  }
-}
-
-export async function getStaticPaths() {
-  return {
-    paths: [],
-    fallback: 'blocking',
   }
 }
