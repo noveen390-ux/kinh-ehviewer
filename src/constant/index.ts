@@ -1,6 +1,6 @@
 export const LOCAL_HISTORY = 'galleryHistory'
 export const LOCAL_SEARCH_HISTORY = 'search_histories'
-export const LOCAL_COMIC_CONFIG = 'comic_config_v2'
+export const LOCAL_COMIC_CONFIG = 'comic_config_v3'
 
 export const LOCAL_COMIC_READ_PAGE_HISTORY = 'comic_read_page_histories'
 
