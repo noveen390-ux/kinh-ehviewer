@@ -47,12 +47,12 @@ const CommentListContent = forwardRef<HTMLUListElement, CommentListProps>(
         // 监听链接，跳转到自己的详情页
         document
           .querySelectorAll<HTMLAnchorElement>(
-            '.commnets-list a[href^="https://exhentai.org/g"]'
+            '.commnets-list a[href^="https://e-hentai.org/g"]'
           )
           .forEach((a) => {
             a.onclick = (e) => {
               e.preventDefault()
-              const path = a.href.replace('https://exhentai.org/g', '')
+              const path = a.href.replace('https://e-hentai.org/g', '')
               router.push('/[gid]/[token]', path)
             }
           })

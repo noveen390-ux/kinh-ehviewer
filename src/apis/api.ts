@@ -1,5 +1,4 @@
 import Axios from 'axios'
-import Router from 'next/router'
 import { DetailPageListItemProps } from '@/interface/gallery'
 export const axios = Axios.create({})
 // const maxQueueLength = 8
@@ -18,10 +17,6 @@ export const axios = Axios.create({})
 // })
 
 axios.interceptors.response.use((res) => {
-  // count--
-  if (res.data.error && res.data.message?.includes('No login')) {
-    Router.replace('/signin')
-  }
   return res
 })
 

@@ -1,4 +1,4 @@
-const baseURL = 'https://exhentai.org'
+const baseURL = 'https://e-hentai.org'
 const baseApiURL = baseURL + '/api.php'
 
 const loginURL = 'https://forums.e-hentai.org/index.php'

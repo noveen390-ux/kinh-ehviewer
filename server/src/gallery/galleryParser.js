@@ -10,15 +10,15 @@ function parseGalleryList(document, mode) {
   const res = []
   let total = 0
 
-  if (mode === GalleryMode.FrontPage || mode === GalleryMode.Favorites)
-    total = parseInt(
-      document.querySelector('p.ip').textContent.replace(/[^0-9]/g, '')
-    )
-  if (mode === GalleryMode.Watched)
-    total = parseInt(
-      document.querySelectorAll('p.ip')[1].textContent.replace(/[^0-9]/g, '')
-    )
-  Array.from(document.querySelectorAll('.itg > tbody > tr'))
+  if (mode === GalleryMode.FrontPage || mode === GalleryMode.Favorites) {
+    const ipEl = document.querySelector('p.ip') || document.querySelector('p');
+    if (ipEl) total = parseInt(ipEl.textContent.replace(/[^0-9]/g, '')) || 0;
+  }
+  if (mode === GalleryMode.Watched) {
+    const ips = document.querySelectorAll('p.ip');
+    if (ips.length >= 2) total = parseInt(ips[1].textContent.replace(/[^0-9]/g, ''));
+  }
+  Array.from(document.querySelectorAll('.itg tr'))
     .slice(1)
     .forEach((tr) => {
       try {
@@ -115,23 +115,26 @@ async function parseHTMLAnchorElement(document) {
 }
 
 function parseDetailPageList(document) {
-  const gdts = document
-    .getElementById('gdt')
-    .querySelectorAll('div[class^="gdt"')
+  const gdt = document.getElementById('gdt')
   const filecount = parseInt(
     document
       .querySelector('#gdd table tr:nth-of-type(6) .gdt2')
       .textContent.replace(/[^0-9]/g, '')
   )
-  return {
-    list: Array.from(gdts).map((gdt) => {
-      const aEl = gdt.querySelector('a')
-      const imgEl = gdt.querySelector('img')
 
-      return { thumb: imgEl.src, url: aEl.href }
-    }),
-    total: filecount,
-  }
+  const anchors = gdt.querySelectorAll('a')
+  const list = Array.from(anchors).map((a) => {
+    const div = a.querySelector('div')
+    let thumb = ''
+    if (div) {
+      const style = div.getAttribute('style') || ''
+      const match = style.match(/background:transparent url\((.*?)\)/)
+      if (match) thumb = match[1]
+    }
+    return { thumb, url: a.href }
+  })
+
+  return { list, total: filecount }
 }
 
 function parseDetailPageCommentList(document) {
@@ -222,7 +225,7 @@ function parseDetailPageInfo(document, html) {
     posted,
     category,
     uploader,
-    url: `https://exhentai.org/g/${gid}/${token}`,
+    url: `https://e-hentai.org/g/${gid}/${token}`,
     language,
     filesize,
     filecount,

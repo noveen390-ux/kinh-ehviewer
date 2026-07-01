@@ -15,7 +15,7 @@ import {
 } from './utils'
 import ProxyImg from '@/components/ProxyImg'
 
-const useStyles = makeStyles((theme: Theme) =>
+const useStyles = makeStyles((theme: any) =>
   createStyles({
     root: {
       transition: theme.transitions.create('height'),

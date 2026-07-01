@@ -1,37 +1,32 @@
-// server.js
 const next = require('next')
-const createProxyMiddleware =
-  require('http-proxy-middleware').createProxyMiddleware
-const devProxy = {
-  '/api': {
-    target: 'http://localhost:8080', // 端口自己配置合适的
-    changeOrigin: true,
-  },
-}
+const express = require('express')
+const cookieParser = require('cookie-parser')
+const { createProxyMiddleware } = require('http-proxy-middleware')
 
-const dev = process.env.NODE_ENV !== 'production'
-const app = next({ dev })
+const port = parseInt(process.env.PORT || '3000')
+const apiPort = 8080
+
+const app = next({ dev: false })
 const handle = app.getRequestHandler()
 
-;(async () => {
-  await app.prepare()
+app.prepare().then(() => {
+  const server = express()
+  server.use(cookieParser())
 
-  const server = dev ? require('express')() : require('./app')
-  if (dev && devProxy) {
-    const cookieParser = require('cookie-parser')
-    server.use(cookieParser())
-    Object.keys(devProxy).forEach(function (context) {
-      server.use(createProxyMiddleware(context, devProxy[context]))
-    })
-  }
+  server.use('/api', createProxyMiddleware({
+    target: `http://localhost:${apiPort}`,
+    changeOrigin: true,
+  }))
 
   server.all('*', (req, res) => {
-    handle(req, res)
+    return handle(req, res)
   })
 
-  if (dev) {
-    server.listen(3000, () => {
-      console.log(`app listening on http://localhost:3000`)
-    })
-  }
-})()
+  server.listen(port, (err) => {
+    if (err) throw err
+    console.log(`> Kinh EhViewer ready on http://localhost:${port}`)
+  })
+}).catch(e => {
+  console.error('Failed to start Next.js:', e)
+  process.exit(1)
+})

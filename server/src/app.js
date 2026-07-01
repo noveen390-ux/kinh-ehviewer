@@ -1,32 +1,19 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-// const cors = require('cors')
 require('express-async-errors')
 const cookieParser = require('cookie-parser')
 const app = express()
 const listEndpoints = require('express-list-endpoints')
-// const { isNil } = require('lodash')
 
-// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }))
-
-// parse application/json
 app.use(bodyParser.json())
-
-// parse cookies
 app.use(cookieParser())
 
 app.use((req, res, next) => {
   if (req.url.startsWith('/api')) console.log('%s -> %s', req.method, req.url)
-
-  // if no login, api will return error
-  if (req.url.startsWith('/api/') && !req.url.startsWith('/api/user')) {
-    if (req.cookies && !req.cookies.ipb_member_id) {
-      return res.json({ error: true, message: 'No login' })
-    }
-  }
   next()
 })
+
 app.get('/api', async (req, res) => {
   res.send(`<pre>${JSON.stringify(listEndpoints(app), null, 2)}</pre>`)
 })
@@ -46,10 +33,12 @@ app.use((err, req, res, next) => {
 })
 
 const PORT = process.env.PORT || 8080
-app.listen(PORT, () => {
-  console.log(
-    `app listening on http://localhost:${PORT}, env: ${process.env.NODE_ENV}`
-  )
+const server = app.listen(PORT, () => {
+  console.log(`API server listening on http://localhost:${PORT}`)
 })
+
+// Keep alive
+process.on('SIGTERM', () => server.close())
+process.on('SIGINT', () => server.close())
 
 module.exports = app

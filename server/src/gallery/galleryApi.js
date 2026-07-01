@@ -65,7 +65,7 @@ async function galleryList({ page, f_search }, cookies) {
     headers: {
       Cookie: cookies,
     },
-    params: { page, f_search, inline_set: 'dm_l' },
+    params: { page, f_search },
     maxRedirects: 2,
   })
   const document = new JSDOM(res.data).window.document

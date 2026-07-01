@@ -111,7 +111,7 @@ const Layout: React.FunctionComponent<Props> = ({
   return (
     <>
       <Head>
-        <title>{title ? title + ' - EhentaiView' : 'EhentaiView'}</title>
+        <title>{title ? title + ' - Kinh EhViewer' : 'Kinh EhViewer'}</title>
       </Head>
       <HideOnScroll>
         <AppBar position="sticky" elevation={1}>
@@ -133,7 +133,7 @@ const Layout: React.FunctionComponent<Props> = ({
               </IconButton>
             )}
             <Typography variant="h6" className={classes.title} noWrap>
-              {title || 'EhentaiView'}
+              {title || 'Kinh EhViewer'}
             </Typography>
             <Hidden smDown>
               {MENU.map((o) => (

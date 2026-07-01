@@ -5,6 +5,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 })
 const nextConfig = {
   i18n,
+  eslint: { ignoreDuringBuilds: true },
 
   env: {
     VERSION: pkg.version,

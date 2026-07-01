@@ -14,7 +14,7 @@ export interface ComicConfigProps {
 }
 
 const defualtComicConfig: ComicConfigProps = {
-  direction: 'vertical',
+  direction: 'rtl',
   imgFit: true,
 }
 

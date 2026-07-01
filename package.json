@@ -1,6 +1,6 @@
 {
-  "name": "e-hentai-view",
-  "productName": "EhentaiView",
+  "name": "kinh-ehviewer",
+  "productName": "Kinh EhViewer",
   "version": "4.2.0",
   "main": "server/src/app.js",
   "license": "MIT",
