@@ -29,6 +29,7 @@ export default function Login() {
           onChange={(e) => { setPassword(e.target.value); setError(false) }}
           placeholder="كلمة المرور"
           style={{ padding: '8px 16px', fontSize: 16, borderRadius: 4, border: '1px solid #555', background: '#333', color: '#fff', width: 200, marginBottom: 12 }}
+          autoComplete="new-password"
           autoFocus
         />
         {error && <p style={{ color: '#f44', margin: '0 0 8px', fontSize: 14 }}>كلمة المرور خطأ</p>}

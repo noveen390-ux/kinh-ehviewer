@@ -29,18 +29,23 @@ function MyApp(props: AppProps) {
   const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
-    const auth = document.cookie.split('; ').find(c => c.startsWith('auth='))
-    const isValid = auth === 'auth=12345'
-    if (router.pathname === '/login') {
-      if (isValid) router.replace('/')
-      else setAuthChecked(true)
-      return
-    }
-    if (!isValid) {
-      router.replace('/login')
-    } else {
-      setAuthChecked(true)
-    }
+    ;(async () => {
+      const res = await fetch('/api/user/check')
+      const { valid } = await res.json()
+      if (router.pathname === '/login') {
+        if (valid) {
+          const params = new URLSearchParams(window.location.search)
+          const redirect = params.get('redirect') || '/'
+          router.replace(redirect)
+        } else setAuthChecked(true)
+        return
+      }
+      if (!valid) {
+        router.replace(`/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`)
+      } else {
+        setAuthChecked(true)
+      }
+    })()
   }, [router.pathname])
 
   React.useEffect(() => {
