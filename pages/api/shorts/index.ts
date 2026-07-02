@@ -7,7 +7,8 @@ async function fetchNsfwSource(): Promise<string[]> {
   try {
     const resp = await fetch(NSFW_API, { signal: AbortSignal.timeout(12000) })
     const urls: string[] = await resp.json()
-    return urls.filter((u: string) => u.endsWith('.mp4'))
+    const seen = new Set<string>()
+    return urls.filter((u: string) => u.endsWith('.mp4') && !seen.has(u) && seen.add(u))
   } catch {
     return []
   }
@@ -22,7 +23,7 @@ async function fetchWatchhentaiVideos(): Promise<{ url: string; title: string; t
     const listData = await listResp.json()
     const items = listData?.data?.items || []
     const slugs = items
-      .slice(0, 4)
+      .slice(0, 8)
       .map((i: any) => (i.url as string).replace(/\/$/, '').split('/').pop())
       .filter(Boolean)
 
@@ -35,10 +36,13 @@ async function fetchWatchhentaiVideos(): Promise<{ url: string; title: string; t
     )
 
     const out: { url: string; title: string; thumb: string }[] = []
+    const seen = new Set<string>()
     for (const r of results) {
       if (r.status !== 'fulfilled') continue
       const d = r.value?.data
       if (!d?.player?.src) continue
+      if (seen.has(d.player.src)) continue
+      seen.add(d.player.src)
       out.push({
         url: d.player.src,
         title: d.title || '',
@@ -79,6 +83,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })
   }
 
-  const shuffled = items.sort(() => Math.random() - 0.5)
+  const seed = Date.now()
+  const shuffled = items
+    .map((item, i) => ({ item, sort: Math.sin(seed + i) }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ item }) => item)
+
   res.json(shuffled)
 }

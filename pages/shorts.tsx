@@ -1,7 +1,7 @@
 import { NextPage } from 'next'
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations'
 import { useRouter } from 'next/router'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 interface ShortItem {
   id: string
@@ -13,32 +13,36 @@ interface ShortItem {
 const Shorts: NextPage = () => {
   const router = useRouter()
   const [items, setItems] = useState<ShortItem[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [playing, setPlaying] = useState<ShortItem | null>(null)
-  const loaderRef = useRef<HTMLDivElement>(null)
 
-  const fetchItems = useCallback(async () => {
-    if (loading) return
-    setLoading(true)
-    try {
-      const res = await fetch('/api/shorts')
-      const data = await res.json()
-      if (data.length) setItems(prev => [...prev, ...data])
-    } catch {}
-    setLoading(false)
-  }, [loading])
-
-  useEffect(() => { fetchItems() }, [])
+  const goBack = () => {
+    if (window.history.length > 1) {
+      router.back()
+    } else {
+      router.replace('/')
+    }
+  }
 
   useEffect(() => {
-    const el = loaderRef.current
-    if (!el) return
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) fetchItems()
-    }, { rootMargin: '400px' })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [fetchItems])
+    let cancelled = false
+    setLoading(true)
+    fetch('/api/shorts?_=' + Date.now())
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return
+        const seen = new Set<string>()
+        const unique = data.filter((item: ShortItem) => {
+          if (seen.has(item.url)) return false
+          seen.add(item.url)
+          return true
+        })
+        setItems(unique)
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [])
 
   return (
     <div style={{ minHeight: '100vh', background: '#0d0d0d', color: '#fff' }}>
@@ -48,7 +52,7 @@ const Shorts: NextPage = () => {
       }}>
         <h1 style={{ margin: 0, fontSize: 18, fontWeight: 600 }}>مقاطع قصيرة</h1>
         <button
-          onClick={() => router.back()}
+          onClick={goBack}
           style={{
             width: 34, height: 34, borderRadius: '50%', border: 'none',
             background: 'rgba(255,255,255,0.1)', color: '#fff', fontSize: 18,
@@ -101,9 +105,11 @@ const Shorts: NextPage = () => {
         ))}
       </div>
 
-      <div ref={loaderRef} style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {loading && <span style={{ color: '#888', fontSize: 14 }}>جارٍ التحميل...</span>}
-      </div>
+      {loading && (
+        <div style={{ height: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ color: '#888', fontSize: 14 }}>جارٍ التحميل...</span>
+        </div>
+      )}
 
       {playing && (
         <div
