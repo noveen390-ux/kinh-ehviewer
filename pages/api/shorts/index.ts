@@ -3,104 +3,102 @@ import { NextApiRequest, NextApiResponse } from 'next'
 const NSFW_BASE = 'https://nsfw-api-p302.onrender.com'
 const WH_API = 'https://watchhentai-api.vercel.app'
 
-async function fetchNsfwSource(): Promise<string[]> {
+interface ShortItem {
+  id: string
+  type: 'direct' | 'lazy'
+  url: string
+  slug: string
+  thumb: string
+  title: string
+}
+
+function urlToId(url: string): string {
+  return url.split('/').pop()?.replace('.mp4', '') || Math.random().toString(36).slice(2)
+}
+
+function urlToTitle(url: string): string {
+  return url.split('/').pop()?.replace('.mp4', '').replace(/[-_]/g, ' ') || ''
+}
+
+async function fetchNsfwSource(): Promise<ShortItem[]> {
   const queries = ['hentai', 'waifu', 'ecchi']
   const seen = new Set<string>()
-  const all: string[] = []
-  for (const q of queries) {
-    try {
-      const resp = await fetch(`${NSFW_BASE}/h/video/search?q=${q}`, {
+  const all: ShortItem[] = []
+
+  const results = await Promise.allSettled(
+    queries.map((q) =>
+      fetch(`${NSFW_BASE}/h/video/search?q=${q}`, {
         signal: AbortSignal.timeout(8000),
+      }).then((r) => r.json())
+    )
+  )
+
+  for (const result of results) {
+    if (result.status !== 'fulfilled') continue
+    const urls: string[] = result.value
+    for (const u of urls) {
+      if (typeof u !== 'string' || !u.endsWith('.mp4')) continue
+      if (seen.has(u)) continue
+      seen.add(u)
+      all.push({
+        id: urlToId(u),
+        type: 'direct',
+        url: u,
+        slug: '',
+        thumb: '',
+        title: urlToTitle(u),
       })
-      const urls: string[] = await resp.json()
-      for (const u of urls) {
-        if (u.endsWith('.mp4') && !seen.has(u)) {
-          seen.add(u)
-          all.push(u)
-        }
-      }
-    } catch {}
+    }
   }
+
   return all
 }
 
-async function fetchWatchhentaiVideos(): Promise<{ url: string; title: string; thumb: string }[]> {
-  try {
-    const pages = await Promise.allSettled(
-      [1, 2].map((p) =>
-        fetch(`${WH_API}/api/videos?page=${p}`, { signal: AbortSignal.timeout(8000) }).then((r) => r.json())
-      )
+async function fetchWatchhentaiAll(): Promise<ShortItem[]> {
+  const totalPages = 126
+  const seen = new Set<string>()
+  const all: ShortItem[] = []
+
+  const results = await Promise.allSettled(
+    Array.from({ length: totalPages }, (_, i) => i + 1).map((p) =>
+      fetch(`${WH_API}/api/videos?page=${p}`, {
+        signal: AbortSignal.timeout(10000),
+      })
+        .then((r) => r.json())
+        .catch(() => null)
     )
-    const slugs: string[] = []
-    for (const p of pages) {
-      if (p.status !== 'fulfilled') continue
-      const items = p.value?.data?.items || []
-      for (const i of items) {
-        const slug = (i.url as string).replace(/\/$/, '').split('/').pop()
-        if (slug) slugs.push(slug)
-      }
-    }
+  )
 
-    const uniqueSlugs = [...new Set(slugs)].slice(0, 16)
-
-    const results = await Promise.allSettled(
-      uniqueSlugs.map((slug) =>
-        fetch(`${WH_API}/api/watch/${slug}`, {
-          signal: AbortSignal.timeout(8000),
-        }).then((r) => r.json())
-      )
-    )
-
-    const out: { url: string; title: string; thumb: string }[] = []
-    const seen = new Set<string>()
-    for (const r of results) {
-      if (r.status !== 'fulfilled') continue
-      const d = r.value?.data
-      if (!d?.player?.src) continue
-      if (seen.has(d.player.src)) continue
-      seen.add(d.player.src)
-      out.push({
-        url: d.player.src,
-        title: d.title || '',
-        thumb: d.thumbnail || '',
+  for (const result of results) {
+    if (result.status !== 'fulfilled' || !result.value) continue
+    const items = result.value?.data?.items || []
+    for (const item of items) {
+      const url = ((item.url as string) || '').replace(/\/$/, '')
+      if (!url || seen.has(url)) continue
+      seen.add(url)
+      const slug = url.split('/').pop() || ''
+      if (!slug) continue
+      all.push({
+        id: String(item.id || slug),
+        type: 'lazy',
+        url: '',
+        slug,
+        thumb: item.thumbnail || '',
+        title: item.title || '',
       })
     }
-    return out
-  } catch {
-    return []
   }
+
+  return all
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const [nsfwUrls, whVideos] = await Promise.all([fetchNsfwSource(), fetchWatchhentaiVideos()])
+  const [nsfwItems, whItems] = await Promise.all([fetchNsfwSource(), fetchWatchhentaiAll()])
 
-  const seen = new Set<string>()
-  const items: { id: string; url: string; thumb: string; title: string }[] = []
-
-  for (const url of nsfwUrls) {
-    if (seen.has(url)) continue
-    seen.add(url)
-    items.push({
-      id: url.split('/').pop()?.replace('.mp4', '') || Math.random().toString(36).slice(2),
-      url,
-      thumb: '',
-      title: url.split('/').pop()?.replace('.mp4', '').replace(/[-_]/g, ' ') || '',
-    })
-  }
-
-  for (const v of whVideos) {
-    if (seen.has(v.url)) continue
-    seen.add(v.url)
-    items.push({
-      id: v.url.split('/').pop()?.replace('.mp4', '') || Math.random().toString(36).slice(2),
-      url: v.url,
-      thumb: v.thumb,
-      title: v.title,
-    })
-  }
+  const all = [...nsfwItems, ...whItems]
 
   const seed = Date.now()
-  const shuffled = items
+  const shuffled = all
     .map((item, i) => ({ item, sort: Math.sin(seed + i) }))
     .sort((a, b) => a.sort - b.sort)
     .map(({ item }) => item)
