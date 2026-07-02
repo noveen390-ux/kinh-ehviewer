@@ -1,35 +1,51 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
-const WATCHHENTAI_API = 'https://watchhentai-api.vercel.app'
-const NSFW_API = 'https://nsfw-api-p302.onrender.com/h/video/search?q=hentai'
+const NSFW_BASE = 'https://nsfw-api-p302.onrender.com'
+const WH_API = 'https://watchhentai-api.vercel.app'
 
 async function fetchNsfwSource(): Promise<string[]> {
-  try {
-    const resp = await fetch(NSFW_API, { signal: AbortSignal.timeout(12000) })
-    const urls: string[] = await resp.json()
-    const seen = new Set<string>()
-    return urls.filter((u: string) => u.endsWith('.mp4') && !seen.has(u) && seen.add(u))
-  } catch {
-    return []
+  const queries = ['hentai', 'waifu', 'ecchi']
+  const seen = new Set<string>()
+  const all: string[] = []
+  for (const q of queries) {
+    try {
+      const resp = await fetch(`${NSFW_BASE}/h/video/search?q=${q}`, {
+        signal: AbortSignal.timeout(8000),
+      })
+      const urls: string[] = await resp.json()
+      for (const u of urls) {
+        if (u.endsWith('.mp4') && !seen.has(u)) {
+          seen.add(u)
+          all.push(u)
+        }
+      }
+    } catch {}
   }
+  return all
 }
 
 async function fetchWatchhentaiVideos(): Promise<{ url: string; title: string; thumb: string }[]> {
   try {
-    const listResp = await fetch(`${WATCHHENTAI_API}/api/videos`, {
-      signal: AbortSignal.timeout(8000),
-    })
-    if (!listResp.ok) return []
-    const listData = await listResp.json()
-    const items = listData?.data?.items || []
-    const slugs = items
-      .slice(0, 8)
-      .map((i: any) => (i.url as string).replace(/\/$/, '').split('/').pop())
-      .filter(Boolean)
+    const pages = await Promise.allSettled(
+      [1, 2].map((p) =>
+        fetch(`${WH_API}/api/videos?page=${p}`, { signal: AbortSignal.timeout(8000) }).then((r) => r.json())
+      )
+    )
+    const slugs: string[] = []
+    for (const p of pages) {
+      if (p.status !== 'fulfilled') continue
+      const items = p.value?.data?.items || []
+      for (const i of items) {
+        const slug = (i.url as string).replace(/\/$/, '').split('/').pop()
+        if (slug) slugs.push(slug)
+      }
+    }
+
+    const uniqueSlugs = [...new Set(slugs)].slice(0, 16)
 
     const results = await Promise.allSettled(
-      slugs.map((slug: string) =>
-        fetch(`${WATCHHENTAI_API}/api/watch/${slug}`, {
+      uniqueSlugs.map((slug) =>
+        fetch(`${WH_API}/api/watch/${slug}`, {
           signal: AbortSignal.timeout(8000),
         }).then((r) => r.json())
       )
