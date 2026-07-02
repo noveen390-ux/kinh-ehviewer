@@ -15,16 +15,17 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     cover: {
       margin: theme.spacing(0, 'auto'),
+      minHeight: 150,
     },
 
     container: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',
+      gridTemplateColumns: 'repeat(5, 1fr)',
       [theme.breakpoints.down('md')]: {
-        gridTemplateColumns: 'repeat(2, 1fr)',
+        gridTemplateColumns: 'repeat(4, 1fr)',
       },
       [theme.breakpoints.down('sm')]: {
-        gridTemplateColumns: 'repeat(1, 1fr)',
+        gridTemplateColumns: 'repeat(3, 1fr)',
       },
     },
 
@@ -57,7 +58,8 @@ const PageList: React.FC<Omit<PageListProps, 'filecount'>> = ({
   const { data, error, size, setSize } = useSWRInfinite(
     (offset) => `/api/gallery${url}/${offset}`,
     async (url: string) => {
-      if (url.endsWith('0')) return initialData
+      const p = parseInt(url.split('/').pop() || '0', 10)
+      if (p === 0) return initialData
       return await loadMorePage(url)
     }
   )

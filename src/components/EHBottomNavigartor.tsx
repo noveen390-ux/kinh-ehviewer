@@ -43,6 +43,10 @@ const useStyles = makeStyles((theme: Theme) =>
     scrollTrigger: {
       transform: 'translateY(100%)',
     },
+    navWrap: {
+      overflowX: 'auto',
+      '&::-webkit-scrollbar': { display: 'none' },
+    },
   })
 )
 
@@ -76,17 +80,19 @@ const EHBottomNavigartor = forwardRef<HTMLDivElement>((_, ref) => {
       <SafeArea
         className={clsx(classes.root, { [classes.scrollTrigger]: trigger })}
       >
-        <BottomNavigation
-          showLabels
-          value={index}
-          onChange={(_, index) => {
-            router.replace(MENU[index].link)
-          }}
-        >
-          {MENU.map((o, k) => (
-            <BottomNavigationAction key={k} label={t(o.title)} icon={o.icon} />
-          ))}
-        </BottomNavigation>
+        <div className={classes.navWrap}>
+          <BottomNavigation
+            showLabels
+            value={index}
+            onChange={(_, index) => {
+              router.replace(MENU[index].link)
+            }}
+          >
+            {MENU.map((o, k) => (
+              <BottomNavigationAction key={k} label={t(o.title)} icon={o.icon} />
+            ))}
+          </BottomNavigation>
+        </div>
       </SafeArea>
       <Toolbar />
     </footer>

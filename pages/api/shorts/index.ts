@@ -1,29 +1,54 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
-const APIS = [
-  'https://nekobot.xyz/api/image?type=hentai',
-  'https://api.waifu.pics/nsfw/waifu',
-  'https://nekos.life/api/v2/img/lewd',
-  'https://nekobot.xyz/api/image?type=thigh',
-  'https://nekobot.xyz/api/image?type=ass',
-]
+const BASE = 'https://nsfw-api-p302.onrender.com'
+const QUERIES = ['hentai', 'anime', 'waifu', 'ecchi', 'nsfw']
+const TYPES = ['h', 'r']
+
+async function fetchSource(type: string, query: string, signal: AbortSignal): Promise<string[]> {
+  try {
+    const url = `${BASE}/${type}/video/search?q=${encodeURIComponent(query)}`
+    const resp = await fetch(url, { signal })
+    if (!resp.ok) return []
+    const data: string[] = await resp.json()
+    return data.filter((u: string) => u.endsWith('.mp4'))
+  } catch {
+    return []
+  }
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 12000)
+
   try {
-    const api = APIS[Math.floor(Math.random() * APIS.length)]
-    const response = await fetch(api)
-    const data = await response.json()
-    let url = ''
-    if (api.includes('nekobot')) {
-      url = data.message
-    } else if (api.includes('waifu.pics')) {
-      url = data.url
-    } else if (api.includes('nekos.life')) {
-      url = data.url
-    }
-    if (!url) throw new Error('No URL found')
-    res.json({ url, source: api })
+    const promises = TYPES.flatMap((t) =>
+      QUERIES.map((q) => fetchSource(t, q, controller.signal))
+    )
+    const results = await Promise.allSettled(promises)
+    const allUrls: string[] = results
+      .flatMap((r) => (r.status === 'fulfilled' ? r.value : []))
+      .filter(Boolean)
+
+    const seen = new Set<string>()
+    const unique = allUrls.filter((url) => {
+      if (seen.has(url)) return false
+      seen.add(url)
+      return true
+    })
+
+    const shuffled = unique.sort(() => Math.random() - 0.5)
+
+    const items = shuffled.map((url: string) => ({
+      id: url.split('/').pop()?.replace('.mp4', '') || Math.random().toString(36).slice(2),
+      url,
+      thumb: '',
+      title: url.split('/').pop()?.replace('.mp4', '').replace(/[-_]/g, ' ') || '',
+    }))
+
+    res.json(items)
   } catch {
-    res.json({ url: '', source: '' })
+    res.json([])
+  } finally {
+    clearTimeout(timer)
   }
 }

@@ -113,8 +113,9 @@ async function galleryDetail({ gid, token }, cookies) {
   return { list, commentList, tagList, info }
 }
 async function galleryDetailPage({ gid, token, p }, cookies) {
-  const res = await axios.get(`${baseURL}/g/${gid}/${token}?p=${p}`, {
+  const res = await axios.get(`${baseURL}/g/${gid}/${token}?p=${p}&inline_set=ts_l`, {
     headers: { Cookie: cookies },
+    maxRedirects: 2,
   })
   const document = new JSDOM(res.data).window.document
   return parseDetailPageList(document)
