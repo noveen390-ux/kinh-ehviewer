@@ -2,7 +2,7 @@ const { loginURL, configURL } = require('../config/api')
 const axios = require('../axios')
 const qs = require('qs')
 const { getCookieString, parseCookieToJSON } = require('../utils/cookies')
-const { parseLogin, parseCookieLogin } = require('./userPrser')
+const { parseLogin, parseCookieLogin } = require('./userParser')
 async function login(payload) {
   const res = await axios(`${loginURL}?act=Login&CODE=01`, {
     method: 'POST',

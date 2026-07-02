@@ -22,6 +22,7 @@ import dayjs from 'dayjs'
 import { useTranslation } from 'next-i18next'
 import { useRouter } from 'next/router'
 import React, { forwardRef, useEffect } from 'react'
+import DOMPurify from 'isomorphic-dompurify'
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -37,26 +38,25 @@ export interface CommentListProps {
   commentList: commentListItemProps[]
   hidden?: boolean
 }
-const CommentListContent = forwardRef<HTMLUListElement, CommentListProps>(
-  ({ commentList, hidden }, ref) => {
+const CommentListContent = forwardRef<HTMLUListElement, CommentListProps>(function CommentListContent(
+  { commentList, hidden }, ref) {
     const classes = useStyles()
     const [t] = useTranslation()
     const router = useRouter()
     useEffect(() => {
-      if (typeof window !== 'undefined') {
-        // 监听链接，跳转到自己的详情页
-        document
-          .querySelectorAll<HTMLAnchorElement>(
-            '.commnets-list a[href^="https://e-hentai.org/g"]'
-          )
-          .forEach((a) => {
-            a.onclick = (e) => {
-              e.preventDefault()
-              const path = a.href.replace('https://e-hentai.org/g', '')
-              router.push('/[gid]/[token]', path)
-            }
-          })
+      const el = (ref as React.RefObject<HTMLUListElement>)?.current || document.querySelector('.commnets-list')
+      if (!el) return
+      const handler = (e: MouseEvent) => {
+        const a = (e.target as HTMLElement).closest<HTMLAnchorElement>(
+          'a[href^="https://e-hentai.org/g"]'
+        )
+        if (!a) return
+        e.preventDefault()
+        const path = a.href.replace('https://e-hentai.org/g', '')
+        router.push('/[gid]/[token]', path)
       }
+      el.addEventListener('click', handler)
+      return () => el.removeEventListener('click', handler)
     }, [])
     return (
       <List ref={ref} className="commnets-list">
@@ -91,7 +91,7 @@ const CommentListContent = forwardRef<HTMLUListElement, CommentListProps>(
                       [classes.hidden]: hidden,
                     })}
                     dangerouslySetInnerHTML={{
-                      __html: `${o.comment}<span> ${o.score}</span>`,
+                      __html: `${DOMPurify.sanitize(o.comment)}<span> ${o.score}</span>`,
                     }}
                   />
                 }

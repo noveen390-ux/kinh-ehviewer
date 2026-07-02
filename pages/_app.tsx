@@ -29,7 +29,7 @@ function MyApp(props: AppProps) {
   const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
-    const isValid = sessionStorage.getItem('auth') === '12345'
+    const isValid = sessionStorage.getItem('auth') === 'valid'
     if (router.pathname === '/login') {
       if (isValid) {
         const params = new URLSearchParams(window.location.search)
@@ -51,21 +51,6 @@ function MyApp(props: AppProps) {
     if (jssStyles) {
       jssStyles.parentElement!.removeChild(jssStyles)
     }
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/sw.js').then(
-          function (registration) {
-            console.log(
-              'Service Worker registration successful with scope: ',
-              registration.scope
-            )
-          },
-          function (err) {
-            console.log('Service Worker registration failed: ', err)
-          }
-        )
-      })
-    }
   }, [])
 
   if (!authChecked && router.pathname !== '/login') {
@@ -83,14 +68,14 @@ function MyApp(props: AppProps) {
       </Head>
       <Script
         async
-        src="https://www.googletagmanager.com/gtag/js?id=UA-177345758-1"
+        src="https://www.googletagmanager.com/gtag/js?id=G-MEASUREMENT_ID"
       ></Script>
       <Script id="google-analytics">
         {`window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
 
-              gtag('config', 'UA-177345758-1');`}
+              gtag('config', 'G-MEASUREMENT_ID');`}
       </Script>
       <SWRConfig value={{ errorRetryInterval: 1000, errorRetryCount: 1 }}>
         <ComicConfig>

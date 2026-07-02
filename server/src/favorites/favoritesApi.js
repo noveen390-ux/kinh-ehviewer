@@ -2,7 +2,7 @@ const axios = require('../axios')
 const { favoritesURL, favoritesApiURL } = require('../config/api')
 const JSDOM = require('jsdom').JSDOM
 const { parseGalleryList } = require('../gallery/galleryParser')
-const { parseFavoritesSettingInfo } = require('./favoritesPaeser')
+const { parseFavoritesSettingInfo } = require('./favoritesParser')
 const qs = require('qs')
 const { GalleryMode } = require('../constant')
 async function getFavorites({ page, favcat }, cookies) {

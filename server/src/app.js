@@ -2,8 +2,22 @@ const express = require('express')
 const bodyParser = require('body-parser')
 require('express-async-errors')
 const cookieParser = require('cookie-parser')
+const helmet = require('helmet')
+const rateLimit = require('express-rate-limit')
 const app = express()
 const listEndpoints = require('express-list-endpoints')
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      'default-src': ["'self'"],
+      'img-src': ["'self'", 'data:', 'https://*.hentai-cdn.com', 'https://e-hentai.org', 'https://exhentai.org'],
+      'connect-src': ["'self'", 'https://api.mymemory.translated.net'],
+      'script-src': ["'self'", 'https://www.googletagmanager.com'],
+      'frame-src': ["'self'", 'https://exhentai.org'],
+    },
+  },
+}))
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
@@ -14,10 +28,19 @@ app.use((req, res, next) => {
   next()
 })
 
-app.get('/api', async (req, res) => {
-  res.send(`<pre>${JSON.stringify(listEndpoints(app), null, 2)}</pre>`)
-})
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/api', async (req, res) => {
+    res.send(`<pre>${JSON.stringify(listEndpoints(app), null, 2)}</pre>`)
+  })
+}
 
+const proxyLimiter = rateLimit({ windowMs: 60 * 1000, max: 60, validate: { xForwardedForHeader: false } })
+const loginLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, validate: { xForwardedForHeader: false } })
+const shortsLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, validate: { xForwardedForHeader: false } })
+
+app.use('/api/gallery/proxy', proxyLimiter)
+app.use('/api/user/login', loginLimiter)
+app.use('/api/shorts', shortsLimiter)
 app.use('/api/gallery', require('./gallery/galleryRouter'))
 app.use('/api/popular', require('./popular/popularRouter'))
 app.use('/api/watched', require('./watched/watchedRouter'))

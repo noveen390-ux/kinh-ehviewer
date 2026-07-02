@@ -1,5 +1,6 @@
 const express = require('express')
 const axios = require('../axios')
+const { validateUrl } = require('../../../utils/ssrfGuard')
 const {
   galleryList,
   galleryDetail,
@@ -95,6 +96,13 @@ router.get('/loadImg', async (req, res) => {
 
 router.get('/proxy', async (req, res) => {
   const url = req.query.url
+  if (!url || typeof url !== 'string') return res.status(400).send('Missing url')
+  try {
+    await validateUrl(url)
+  } catch (err) {
+    return res.status(403).send(err.message)
+  }
+  const allowedHeaders = new Set(['content-type', 'content-length', 'etag', 'last-modified', 'accept-ranges'])
   axios
     .get(url, {
       headers: { Cookie: getCookieString(req.cookies) },
@@ -102,10 +110,11 @@ router.get('/proxy', async (req, res) => {
     })
     .then((response) => {
       Object.entries(response.headers).forEach(([key, value]) => {
-        res.setHeader(key, value)
+        if (allowedHeaders.has(key.toLowerCase())) {
+          res.setHeader(key, value)
+        }
       })
-      res.setHeader('cache-control', 'max-age=31536000, public, immutable')
-      res.setHeader('max-age', '31536000')
+      res.setHeader('cache-control', 'private, max-age=600')
       response.data.pipe(res)
     })
     .catch((err) => {

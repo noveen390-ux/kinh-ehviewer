@@ -1,5 +1,6 @@
 const { uniq } = require('lodash')
 const dayjs = require('dayjs')
+const DOMPurify = require('isomorphic-dompurify')
 const { GalleryMode } = require('../constant')
 
 /**
@@ -154,7 +155,7 @@ function parseDetailPageCommentList(document) {
     res.userName = name
     res.score = c5 ? c5.textContent : ''
 
-    res.comment = c6.innerHTML
+    res.comment = DOMPurify.sanitize(c6.innerHTML)
     return res
   })
 }

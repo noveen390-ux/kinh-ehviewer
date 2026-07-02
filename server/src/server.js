@@ -6,7 +6,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware')
 const port = parseInt(process.env.PORT || '3000')
 const apiPort = 8080
 
-const app = next({ dev: false })
+const app = next({ dev: process.env.NODE_ENV !== 'production' })
 const handle = app.getRequestHandler()
 
 app.prepare().then(() => {

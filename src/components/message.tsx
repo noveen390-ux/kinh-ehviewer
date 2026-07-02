@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import MessageSnackbar from './Snackebar'
 import ThemeProvider from 'src/theme'
 import { StyledEngineProvider } from '@mui/material'
@@ -22,13 +22,13 @@ class Message {
     div.id = uid
     this._processQueue(uid)
     document.body.appendChild(div)
-    ReactDOM.render(
+    const root = createRoot(div)
+    root.render(
       <StyledEngineProvider injectFirst>
         <ThemeProvider>
           <MessageSnackbar {...props} />
         </ThemeProvider>
-      </StyledEngineProvider>,
-      div
+      </StyledEngineProvider>
     )
     setTimeout(() => {
       this._removeTarget(uid)

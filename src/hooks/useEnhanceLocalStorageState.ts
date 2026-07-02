@@ -5,7 +5,7 @@ function useEnhanceLocalStorageState<T>(key: string, defaultValue: T) {
   const [state, setState] = useState<T>(() => {
     if (isBrowser) {
       const local = localStorage.getItem(key)
-      return local ? JSON.parse(local) : defaultValue
+      if (local) { try { return JSON.parse(local) } catch { return defaultValue } } else return defaultValue
     } else return defaultValue
   })
 

@@ -4,20 +4,38 @@ export default function Login() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     const saved = localStorage.getItem('username')
     if (saved) setUsername(saved)
   }, [])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!username.trim()) return
-    if (password !== '12345') return setError(true)
-    localStorage.setItem('username', username.trim())
-    sessionStorage.setItem('auth', '12345')
-    const params = new URLSearchParams(window.location.search)
-    window.location.href = params.get('redirect') || '/'
+    if (!username.trim() || submitting) return
+    setSubmitting(true)
+    setError(false)
+    try {
+      const resp = await fetch('/api/user/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+      const data = await resp.json()
+      if (data.error) {
+        setError(true)
+        setSubmitting(false)
+        return
+      }
+      localStorage.setItem('username', username.trim())
+      sessionStorage.setItem('auth', 'valid')
+      const params = new URLSearchParams(window.location.search)
+      window.location.href = params.get('redirect') || '/'
+    } catch {
+      setError(true)
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -41,8 +59,8 @@ export default function Login() {
           autoComplete="new-password"
         />
         {error && <p style={{ color: '#f44', margin: '0 0 8px', fontSize: 14 }}>كلمة المرور خطأ</p>}
-        <button type="submit" style={{ display: 'block', width: '100%', padding: '8px', fontSize: 16, borderRadius: 4, border: 'none', background: '#1976d2', color: '#fff', cursor: 'pointer' }}>
-          دخول
+        <button type="submit" disabled={submitting} style={{ display: 'block', width: '100%', padding: '8px', fontSize: 16, borderRadius: 4, border: 'none', background: '#1976d2', color: '#fff', cursor: 'pointer', opacity: submitting ? 0.6 : 1 }}>
+          {submitting ? '...' : 'دخول'}
         </button>
       </form>
     </div>

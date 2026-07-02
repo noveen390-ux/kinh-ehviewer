@@ -84,6 +84,7 @@ const SettingsMenuInfo = {
   link: '/settings',
 }
 type Props = {
+  children?: React.ReactNode
   title?: string
   noContainer?: boolean | null
   fullScreen?: boolean

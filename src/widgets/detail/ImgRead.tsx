@@ -9,7 +9,6 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import { useUpdateEffect } from 'ahooks'
 import { range } from 'lodash-es'
 import React, { useEffect, useRef, useState } from 'react'
-let cacheId: boolean[] = []
 const useStyle = makeStyles((theme: Theme) =>
   createStyles({
     root: {
@@ -67,15 +66,14 @@ const ImgRead: React.FC<ImgReadProps> = ({
   loadMore: loadNextPage,
 }) => {
   const ref = useRef<HTMLDivElement>()
+  const cacheIdRef = useRef<boolean[]>([])
   const classes = useStyle()
   const [cacheImg, setCacheImg] = useState<string[]>([])
   const [index, setIndex] = useState(defaultValue)
   const [errorMap, setErrorMap] = useState<{ [n: number]: boolean }>({})
   const [freshKey, setFreshKey] = useState(0)
   useEffect(() => {
-    cacheId = []
     return () => {
-      cacheId = []
       document.body.style.overflow = ''
     }
   }, [])
@@ -91,11 +89,11 @@ const ImgRead: React.FC<ImgReadProps> = ({
   }, [index])
 
   useEffect(() => {
-    let intersectionObserver = new IntersectionObserver(
+    const intersectionObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry?.intersectionRatio) {
-            let idx = parseInt(entry.target.id.slice(3))
+            const idx = parseInt(entry.target.id.slice(3))
             setIndex(idx)
           }
         })
@@ -109,6 +107,7 @@ const ImgRead: React.FC<ImgReadProps> = ({
         }
       )
     }
+    return () => intersectionObserver.disconnect()
   }, [cacheImg])
 
   useEffect(() => {
@@ -140,12 +139,12 @@ const ImgRead: React.FC<ImgReadProps> = ({
       for (let i of indexArr) {
         if (!dataSource[i]) continue
         let url = dataSource[i].url
-        if (cacheId[i]) continue
-        cacheId[i] = true
+        if (cacheIdRef.current[i]) continue
+        cacheIdRef.current[i] = true
 
         let res = await loadImg(url)
         if (res.error) {
-          cacheId[i] = false
+          cacheIdRef.current[i] = false
           setFreshKey(Math.random())
           continue
         }
@@ -192,7 +191,7 @@ const ImgRead: React.FC<ImgReadProps> = ({
                       size="small"
                       onClick={(e) => {
                         e.stopPropagation()
-                        cacheId[k] = false
+                        cacheIdRef.current[k] = false
                         setFreshKey(Math.random())
                       }}
                     >
